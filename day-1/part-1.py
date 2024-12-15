@@ -30,11 +30,11 @@ def calc_diff(left: list[int] , right: list[int]):
 
 
 def get_file_path_from_user():
-	if len(sys.argv) != 1:
+	if len(sys.argv) != 2:
 		logger.error(f"Too many argument({len(sys.argv)}), expecting 1")
 		exit(1)
 	
-	return sys.argv[0]
+	return sys.argv[1]
 
 
 def main():
