@@ -2,7 +2,7 @@ import sys
 from logger import logger
 
 def load_data_from_file(path: str):
-	with open('in.txt', 'r') as input_file:
+	with open(path, 'r') as input_file:
 		left_nums = []
 		right_nums = []
 		for line in input_file:
