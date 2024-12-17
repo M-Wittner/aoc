@@ -1,6 +1,5 @@
 from logger import logger
-import importlib
-part1 = importlib.import_module("part-1")
+from part1 import get_file_path_from_user, load_data_from_file
 
 def get_num_of_occurrences(num: int, list: list[int]):
 	return list.count(num)
@@ -9,8 +8,8 @@ def calc_similarity_score(num: int, times: int):
 	return num * times
 
 def main():
-	file_path = part1.get_file_path_from_user()
-	left_nums, right_nums = part1.load_data_from_file(file_path)
+	file_path = get_file_path_from_user()
+	left_nums, right_nums = load_data_from_file(file_path)
 	similarity_score = 0
 	for num in left_nums:
 		occur = get_num_of_occurrences(num, right_nums)
