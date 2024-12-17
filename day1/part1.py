@@ -1,5 +1,5 @@
 import sys
-from logger import logger
+from .logger import logger
 
 def load_data_from_file(path: str, delimiter = '   '):
 	with open(path, 'r') as input_file:
