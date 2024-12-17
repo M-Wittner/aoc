@@ -1,12 +1,12 @@
 import sys
 from logger import logger
 
-def load_data_from_file(path: str):
+def load_data_from_file(path: str, delimiter = '   '):
 	with open(path, 'r') as input_file:
 		left_nums = []
 		right_nums = []
 		for line in input_file:
-			left, right = line.strip().rsplit('   ')
+			left, right = line.strip().rsplit(delimiter)
 			left_nums.append(int(left))
 			right_nums.append(int(right))
 		
