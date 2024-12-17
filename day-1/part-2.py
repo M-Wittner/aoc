@@ -12,11 +12,12 @@ def main():
 	file_path = part1.get_file_path_from_user()
 	left_nums, right_nums = part1.load_data_from_file(file_path)
 	similarity_score = 0
-	reducted_right_nums = right_nums
 	for num in left_nums:
-		occur = get_num_of_occurrences(num, reducted_right_nums)
-		reducted_right_nums = list(filter(lambda x: x != num, reducted_right_nums))
-		similarity_score += calc_similarity_score(num, occur)
+		occur = get_num_of_occurrences(num, right_nums)
+		self_occur = get_num_of_occurrences(num, left_nums)
+		right_nums = list(filter(lambda x: x != num, right_nums))
+		left_nums = list(filter(lambda x: x != num, left_nums))
+		similarity_score += calc_similarity_score(num, occur*self_occur)
 
 	logger.info(f"Similarity Score: {similarity_score}")
 
