@@ -16,7 +16,7 @@ def load_data_from_file(path: str, delimiter = '   '):
 	return lines
 
 def is_report_sorted(report: list[int]):
-    return (all(report[i] < report[i + 1] for i in range(len(report) - 1))) or (all(report[i] > report[i + 1] for i in range(len(report) - 1)))
+    return (all([report[i] < report[i + 1] for i in range(len(report) - 1)])) or (all([report[i] > report[i + 1] for i in range(len(report) - 1)]))
 				  
 def is_report_safe(report: list[int]):
 	report_safe = True
@@ -25,20 +25,24 @@ def is_report_safe(report: list[int]):
 			break
 		else:
 			report_safe = 0 < abs(report[level] - report[level+1]) <= 3
-			logger.info(f"#{level} Report {report} is Safe {report_safe}, {abs(report[level] - report[level+1])}")
+			# logger.info(f"#{level} Report {report} is Safe {report_safe}, {abs(report[level] - report[level+1])}")
 	
 	return report_safe
-		
 
+def return_is_report_safe(report):
+	if is_report_sorted(report):
+		if is_report_safe(report):
+			return True
+	return False
 def main():
     file_path = get_file_path_from_user()
     reports = load_data_from_file(file_path, ' ')
 
     safe_report_count = 0
     for report in reports:
-        if is_report_sorted(report):
-            if is_report_safe(report):
-                safe_report_count += 1
+        if return_is_report_safe(report):
+            safe_report_count += 1
+
 
     logger.info(f"Safe Reports: {safe_report_count}")
 
