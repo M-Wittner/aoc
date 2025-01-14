@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 import re
-from collections import Counter
+from copy import deepcopy
+from enum import Enum
 
 # Add the project root directory to sys.path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -12,89 +13,70 @@ from day1.part1 import get_file_path_from_user
 def load_data_from_file(file_path):
     with open(file_path,'r') as input_file:
         lines = []
-        columns = []
         for line in input_file:
             lines.append(line.strip())
-            for i in range(len(line)-1):
-                if len(columns) <= i:
-                    columns.insert(i,"")
-                columns[i] = f"{columns[i]}{line[i]}"
 	
-    return lines, columns
+    return lines
+# 8 directions: Forward, bottom right, down, bottom left, backward, top left, up, top right
+#               (0,1)       (1,1)     (1,0)    (-1,-1)      (0,-1)  (-1,-1) (-1,0) (-1,1)
+# DIRECTIONS = [(0,1),(1,1),(1,0),(-1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)]
+DIRECTIONS = Enum('Direction', [("Forward", (1,0)), ("Bottom_Right",(1,1)), ("Down",(0,1)), ("Bottom_Left",(-1,1)), ("Backward",(-1,0)), ("Top_Left",(-1,-1)), ("Up",(0,-1)), ("Top_Right",(1,-1))])
 
-# def load_data_from_file(path):
-#     string = None
-#     with open(path, 'r') as file:
-#         string = file.read().replace('\n', '')
-#     return string
+def can_check_direction(point: tuple, word_length: int, crossword_size: int, direction: tuple):
+    # for i in range(word_length):
+    point_x = deepcopy(point)[0]+(direction.value[0]*word_length)
+    point_y = deepcopy(point)[1]+(direction.value[1]*word_length)
+    if point_x < 0 or point_x > crossword_size-1:
+        logger.info(f"X ({point}, {direction.name}) out of range ({point_x},{point_y})")
+        return False
+    if point_y < 0 or point_y > crossword_size-1:
+        logger.info(f"Y ({point}, {direction.name}) out of range ({point_x},{point_y})")
+        return False
+    logger.info(f"Point {point, direction.name} is in range {point_x, point_y, crossword_size} - ({point_x < 0 or point_x > crossword_size-1} or {point_y < 0 or point_y > crossword_size-1})")
+    return True
 
-def re_sreach(string):
-    matches = re.findall(r"XMAS|SAMX", string)
-
-    # print(f"found {matches} in {string}")
-    match_strings = []
-    for match in matches:
-        match_strings.append(match[0] or match[1])
-    return len(match_strings)
-
-# def re_search(string, pattern):
-#     search_pattern = '.*'.join(list(pattern))
-#     print(f"Looking for {pattern} in {string}")
-#     obj = re.compile(search_pattern)
-#     return obj.search(string)
-
-# def find_xmases(string: str):
-#     xmas = "XMAS"
-#     samx = "SAMX"
-#     count = 0
-#     if re_search(string, xmas):
-#         count +=1
-#     if re_search(string, samx):
-#         count +=1
-#     print(f"found {count}")
-#     return count
-
-def crossword(lines):
-    xmas = "XMAS"
-    samx = "SAMX"
-    count = 0
+def check_direction(point, direction, word, crossword):
+    point_copy = deepcopy(point)
     
-    for l in range(len(lines)-1):
+    for i in range(len(word)):
+        logger.info(f"#{i} Checking Point {point_copy, direction.value}, word {word[i]} cross {crossword[point_copy[1]][point_copy[0]]}")
+        if word[i] != crossword[point_copy[1]][point_copy[0]]:
+            return False
+        point_copy = (point_copy[0]+direction.value[0], point_copy[1]+direction.value[1])
+    
+    return True
+        
+def solve_crossword(lines):
+    xmas = "XMAS"
+    word_length = len(xmas)
+    logger.info(word_length)
+    crossword_size = len(lines) # assuming this is an even dimensioned crossword
+    count = 0
+    for l in range(len(lines)):
         line = lines[l]
-        for i in range(len(line)-5):
-            letter = line[i]
-            if letter == xmas[0] or letter == samx[0]:
-                word = line[i:i+4]
-                # cross_word = [line[i],lines[l+1][i+1]]
-                cross_word = "".join([line[i]]+ [lines[l+1+s][i+1+s] for s in range(len(line)-i-1-l)])
-                cross_matches = re_sreach(cross_word)
-                print(f"Line #{l+1} CrossWord [#{i+1}]: {cross_word} in line {line}, matched {cross_matches}")
-                # reverse_cross_word = "".join([line[i]]+ [lines[l+1+s][i-1-s] for s in range(i)])
-                # reverse_cross_matches = re_sreach(reverse_cross_word)
-                # print(f"Line #{l+1} Revered CrossWord [#{i+1}]: {reverse_cross_word} in line {line}, matched {reverse_cross_matches}")
-                if word == xmas or word == samx:
-                    print(f"Word: {word} in line {line}")
-                    count += 1
-                count += cross_matches #+reverse_cross_matches
-    return count
+        point_y = l
+        for i in range(len(line)):
+            point_x = i
+            point = (point_x, point_y)
+            if line[i] != xmas[0]:
+                logger.info(f"Word doesn't start with {line[i]} Skipping {point}")
+                continue
+            logger.info(f"Point: {point}, letter: {line[i]}")
+            for direction in DIRECTIONS:
+                # logger.info(direction.name)
+                if can_check_direction(point, word_length, crossword_size, direction):
+                    if check_direction(point, direction, xmas, lines):
+                        count += 1
+                        logger.info(f"Found match #{count}! {point, direction.name}")
 
-# def check_diagnols(lines):
-#     for line in lines:
-#         for letter in
+    return count
 
 def main():
     file_path = get_file_path_from_user()
-    lines, columns = load_data_from_file(file_path)
-    # text = load_data_from_file(file_path)
-    xmases = 0
-    xmases = crossword(lines) + crossword(columns)
-    # xmases = find_xmases(text)
-    # for line in lines:
-    #     xmases += find_xmases(line)
-    # for col in columns:
-    #     xmases += find_xmases(col)
+    lines = load_data_from_file(file_path)
     
-    print(xmases)
+    count = solve_crossword(lines)
+    logger.info(count)
 
 if __name__ == "__main__":
     main()
